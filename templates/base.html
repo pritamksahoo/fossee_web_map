@@ -1,0 +1,287 @@
+{% load static %}
+<head>
+  <title>{% block title %}Your file{% endblock %}</title>
+  <style type="text/css">
+    #visualization path {
+        stroke-width:1; /* control the countries borders width */
+        stroke:white; /* choose a color for the border */
+        }
+  </style>
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <!-- For Google GeoChart India Map -->
+  <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+  <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
+  {% block stylesheet %}{% endblock %}
+  {% block script %}{% endblock %}
+
+</head>
+
+<body onload="w3_open()">
+
+  {% block body %}
+  
+  <div id="cover"><span id="s1">L</span><span id="s2">o</span><span id="s3">a</span><span id="s4">d</span><span id="s5">i</span><span id="s6">n</span><span id="s7">g</span><span id="s8">.</span><span id="s9">.</span><span id="s10">.</span>
+  </div>
+
+  <!-- Left Navbar -->
+
+  <div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="background-color: #111111; display: none" id="mySidebar">
+    <button class="w3-bar-item w3-button w3-large" onclick="w3_close()" style=" background-color: #444444; color: #dddddd;">&#x21F1; Full-screen</button>
+    
+    <a href="{% url 'showdata' fileid %}" class="w3-bar-item w3-button" style="text-decoration: none; padding-top: 11px; padding-bottom: 11px;color: white;">Full data
+    </a>
+    
+    <a href="#" class="button w3-bar-item w3-button cd-popup" data-toggle="modal" data-target="#modal1" onclick="" style="text-decoration: none; padding-top: 11px; padding-bottom: 11px; color: white;">
+    Clean your data
+    </a>
+
+    <a href="#" class="button w3-bar-item w3-button cd-popup" data-toggle="modal" data-target="#modal3" onclick="" style="text-decoration: none; padding-top: 11px; padding-bottom: 11px;color: white;">
+    Modify your data
+    </a>
+
+    <a href="{% url 'groupby_district' fileid %}" class="w3-bar-item w3-button" style="text-decoration: none; padding-top: 11px; padding-bottom: 11px; color: white;">
+    Your data  <br>[ <i style="font-family: verdana; font-size: 13px">Statistics</i> ]
+    </a>
+    
+    <hr style="margin: 0px;">
+    
+    <a href="{% url 'close' fileid %}" class="w3-bar-item w3-button" style="background-color: #222222; text-decoration: none; padding-top: 15px; padding-bottom: 15px; color: white;">
+      <b>Close when done</b>
+    </a>
+
+    <hr style="margin: 0px;">
+
+  </div>
+
+<div id="main" style="padding-bottom: 1em;">
+
+  <div class="w3-teal" style="background-color: #333333">
+    <div class="w3-container" style="background-color: #222222; class="fixed-top"">
+      <h4 style="font-family: Courier;"><button id="openNav" class="w3-button w3-xlarge" onclick="w3_open()">&#9776;</button>&nbsp;</h4>
+    </div>
+  </div>
+
+  <!-- Closing all jobs when done -->
+  <a class="btn btn-danger" title="Click here when you are finished with your job" href="" data-toggle="modal" data-target="#modal7" style="padding: 4px; padding-right: 6px; padding-left: 6px; margin-bottom: 10px; margin-top: 1.5em; margin-left: 3em; font-size: 10px;">Close when done</a>&nbsp;
+  
+  <!-- For plotting -->
+  <button type="button" title="Go to '/Your data/Individual State' page to see" id="mybtn" class="btn btn-primary" data-toggle="modal" data-target="#modal2" style="padding: 4px; padding-right: 6px; padding-left: 6px;  margin-bottom: 10px; margin-top: 1.5em; font-size: 10px;" disabled>
+    Plot on India Map and Charts
+  </button>
+
+  {% block stat %}{% endblock %}
+
+  <!-- Modal for India Map Plot -->
+  <div id="modal2" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header" style="padding-bottom: 1em; background-color: #555555; padding: 5px; margin: 4px;">
+          <h5 id="htitle" class="modal-title" style="font-family: Arial; color: #dddddd; font-size: 16px; margin-left: 1em; padding-bottom: 5px;"><b>India Map (State wise) - </b><i>Hover around states to see individual statistics</i></h5>
+          <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+        </div>
+
+        <div style="margin-bottom: 0px;">
+          <button class="btn btn-dark" id="geo" style="margin-left: 5px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;">Geochart</button>
+
+          <button class="btn btn-dark" id="pie" style="margin-left: 1px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;">Pie Chart</button>
+
+          <span id="save" style="float: right; margin-right: 1em;"></span>          
+
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body" id="visualization" style="overflow-x: scroll; overflow-y: scroll; margin: 1px; margin-top: 1px; margin-left: 3em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+          Modal body..
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for clean data -->
+  <div id="modal1" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="padding-bottom: 1em; background-color: darkred; padding: 5px; margin: 4px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 16px; margin-left: 1em; padding-bottom: 5px;"><b>WARNING ! </b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" style="margin: 1px; margin-top: 1px; margin-left: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            If any row contains 'Null' (NaN) entry in 'College Name' column, the whole row will be removed.<br><br>Duplicates rows wil be deleted.<hr><b style="font-family: verdana">Are you sure? If yes, press 'OK'</b>
+          </div>
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <a href="{% url 'clean_data' fileid %}" type="button" class="btn btn-primary">OK</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for modify data -->
+    <div id="modal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="padding-bottom: 1em; background-color: darkgreen; padding: 5px; margin: 4px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 16px; margin-left: 1em; padding-bottom: 5px;"><b>INFORMATION ! </b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" style="margin: 1px; margin-top: 1px; margin-left: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            We'll auto-correct any error in STATE, and DISTRICT datas and give you suggestion about COLLEGE datas.<br><br><i style="font-size: 13px; ">We won't check for any error in remaining datas.</i><hr><b style="font-family: verdana">Press 'OK' to proceed</b>
+          </div>
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <a href="{% url 'modify_data' fileid %}" type="button" class="btn btn-primary">OK</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal before closing portal -->
+    <div id="modal7" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="padding-bottom: 1em; background-color: darkred; padding: 5px; margin: 4px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 16px; margin-left: 1em; padding-bottom: 5px;"><b>ATTENTION ! </b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" style="margin: 1px; margin-top: 1px; margin-left: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            You are about to close your session. Your file will be deleted; so, make sure you are done.<hr><b style="font-family: verdana">Are you sure? If yes, press 'OK'</b>
+          </div>
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+            <a href="{% url 'close' fileid %}" type="button" class="btn btn-primary">OK</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+  <hr style="margin-top: 4px">
+  
+  <div class="container" style="width: 100%; overflow-x: scroll; overflow-y: scroll; padding-bottom: 1px; padding-right: 1px; padding-left: 21px; margin-top: 1px; background-color: white;">
+    <div class="row" style="width: 99%;padding-left: 25px;">
+    {% block container %}{% endblock container %}    <!-- Main content goes here -->
+    </div> 
+  </div>
+
+</div>
+
+{% endblock body %}
+
+<script>
+
+  function bealert() {
+    var ans = confirm("All entries containg atleast one 'Null' (NaN) value will be removed ! Please be sure before doing this.\n Press 'OK' to clean your data! ");
+    if(ans == true) {
+      
+    }
+  }
+
+  $(document).ready(function() {
+   $("#cover").hide();
+  });
+
+  //Start plotting
+
+  google.load('visualization', '1', {'packages': ['geochart', 'corechart']});
+  google.setOnLoadCallback(drawVisualization);
+
+function drawVisualization() {
+  var data = google.visualization.arrayToDataTable(
+    {{ state_list | safe }}
+  );
+  
+  var opts = {
+    region: 'IN',
+    domain: 'IN',
+    displayMode: 'regions',
+    resolution: 'provinces',
+    datalessRegionColor: 'transparent',
+    width: 750, 
+    height: 540,
+    //colorAxis: {colors: ['#00853f', 'black', '#e31b23']},
+    colorAxis: {colors: ['#eeeeee', 'black']},
+    //colorAxis: {colors: ['#00f273', '#009b4a', '#004722', 'black', '#e31b23', '#e06065', '#e2a1a3' ]},
+    backgroundColor: 'white',
+    defaultColor: '#f5f5f5',
+  };
+
+  var chart_div = document.getElementById('visualization');
+  var geochart = new google.visualization.GeoChart(chart_div);
+
+  //To download the geochart as png
+  google.visualization.events.addListener(geochart, 'ready', function () {
+    document.getElementById("save").innerHTML = '<a href="' + geochart.getImageURI() + '" class="btn btn-primary" style="margin-left: 5px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;" download>Download png</a>';
+  });
+
+  // For Geochart
+  $('#geo').click(function() {
+      document.getElementById("htitle").innerHTML = "<b>India Map (State wise) - </b><i>Hover around states to see it's statistics</i>";
+      chart_div = document.getElementById('visualization');
+      geochart = new google.visualization.GeoChart(chart_div);
+
+      google.visualization.events.addListener(geochart, 'ready', function () {
+        document.getElementById("save").innerHTML = '<a href="' + geochart.getImageURI() + '" class="btn btn-primary" style="margin-left: 5px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;" download>Download png</a>';
+      });
+
+      geochart.draw(data, opts);
+  });
+
+  // For pie chart
+  $('#pie').click(function() {
+    document.getElementById("save").innerHTML = "";
+    document.getElementById("htitle").innerHTML = "<b>India Map (State wise) - </b><i>Pie Chart</i>";
+    chart_divi = document.getElementById('visualization');
+    piechart = new google.visualization.PieChart(chart_divi);
+    /*
+    google.visualization.events.addListener(piechart, 'ready', function () {
+      chart_divi.innerHTML = '<img src="' + piechart.getImageURI() + '">';
+      console.log(chart_divi.innerHTML);
+    })
+    */
+    piechart.draw(google.visualization.arrayToDataTable({{ pie_list | safe }}), {title: '% in India (No. of colleges per State)' , is3D: true});
+  });
+    
+
+  geochart.draw(data, opts);
+
+};
+
+</script>
+
+{% if map == 'yes' %}
+
+  <script type="text/javascript">
+    document.getElementById("mybtn").disabled = false;
+    document.getElementById("mybtn").title = "Click here to see State-wise India Map plot";
+  </script>
+
+{% endif %}
+
+{% block js %}{% endblock %}
+</body>

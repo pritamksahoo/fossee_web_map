@@ -1,0 +1,251 @@
+{% extends 'base.html' %}{% load static %}{% load util %}
+  {% block title %}Your file{% endblock %}
+  {% block stylesheet %}
+  <link rel="stylesheet" href="{% static 'css/yourdata.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/responsive.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <link rel="stylesheet" href="{% static 'css/select.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/colReorder.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dataTables.searchHighlight.css' %}">
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+  {% endblock %}
+  {% block script %}
+  <script src="{% static 'js/w3data.js' %}"></script>
+  <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+  <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'js/responsive.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.colReorder.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.select.min.js' %}"></script>
+  <script src="{% static 'js/yourdata.js' %}"></script>
+  <script src="{% static 'js/jquery.highlight.js' %}"></script>
+  <script src="{% static 'js/dataTables.searchHighlight.min.js' %}"></script> 
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+  {% endblock %}
+
+  <!-- Main body -->
+  {% block container %}
+
+    <!-- For college searching -->
+    <table border="0" cellspacing="5" cellpadding="5">
+      <tbody>
+        <tr>
+          <td>College Name :</td>
+          <td>
+            <input type="text" id="search" size="100" />
+            <button class="btn" style="background-color: darkred; padding: 1.5px; padding-right: 6px; padding-left: 6px; margin-left: 3em; font-size: 10px; color: white;" onclick="all_clear()">
+              Reset
+            </button>
+            
+          </td>
+        </tr>
+        <tr>
+          <td id="select"></td>
+          <td>
+            <div id="dynamicInput"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button type="button" id="mybtn2" class="btn btn-primary" data-toggle="modal" data-target="#modal6" hidden>
+    button
+    </button>
+
+    <!-- Info about page -->
+    <div id="modal6" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-body" style="margin: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            <button type="button" class="close" data-dismiss="modal" style="color: #444444;">&times;</button>
+            <p style="font-family: verdana">You are seeing the full view of your data !</p><p style="font-size: 12px;">Go to <b>'Your data [STATISTICS]'</b> page(s) to see the statistics of your data (count)</p>
+            <button onclick="set_cookie()" data-dismiss="modal" class="btn btn-secondary" style="font-size: 10px; padding: 4px; float: right;">Do not show this again</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id='display' style="max-width: 100%; padding-left: 0px; margin-left: 0px;"></div>
+
+  {% endblock container %}
+  <!-- End of body -->
+
+{% block js %}
+<script type="text/javascript">
+
+var someVar = {{ orgdata|js }};
+document.getElementById('display').innerHTML = someVar;
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+jQuery(function(){
+  console.log(getCookie('no_thank'));
+  if (getCookie('no_thank') != 'active') {
+    jQuery('#mybtn2').click();
+  }
+});
+
+function set_cookie() {
+  document.cookie = "no_thank=active";
+}
+
+var mydata;
+var mytable;
+
+// Adding footer to the table
+$(".dataframe").append(
+    $('<tfoot style="font-size: 12px;" />').append($("table thead tr").clone())
+);
+$("table tfoot tr th").css({
+  'font-family':'arial'
+});
+$("table thead tr th").css({
+  'text-align':'center'
+})
+
+//Sending request (for college name) to python by ajax
+$('#search').keyup(function () {
+  var value = $(this).val().trim(); // remove any spaces around the text
+  if(value != ""){ // don't make requests with an empty string
+    $.ajax({
+      url: "{% url 'search' fileid %}",
+      data: {
+        'searchText': value
+      },
+      dataType: "json",
+      async: true,
+      success: function(data){
+        //console.log(data);
+        //document.getElementById("results").innerHTML = data;
+        mydata = data['search_result'];
+        //console.log(mydata);   
+        var res="<select id='box' autofocus>";
+        for (elem in mydata) {
+          res += '<option value="' + mydata[elem] + '">' + mydata[elem] + '</option>';
+        }
+        res += '</select> &nbsp;<button class="btn" style="background-color: green; padding: 1.5px; padding-right: 6px; padding-left: 6px; margin-left: 3em; font-size: 10px; color: white;" onclick="find_data()">Search</button>';
+        document.getElementById("dynamicInput").innerHTML = res;
+        document.getElementById("select").innerHTML = "Select college :";
+        //console.log(document.getElementById("dynamicInput"));
+      }
+    });
+  }
+  else{
+    document.getElementById("dynamicInput").innerHTML = "";
+    mytable.search("").draw();
+    document.getElementById("select").innerHTML = "";
+  }
+});
+
+
+//Filter Range in Data Table (min and max statistics)
+$.fn.dataTable.ext.search.push(
+
+    function( settings, data, dataIndex ) {
+        var min = parseInt( $('#min').val(), 10 );
+        var max = parseInt( $('#max').val(), 10 );
+        var num = parseInt( data[3] ) || parseInt(data[2]) || parseInt(data[4]); 
+  //var college = data[3];
+  //var name = $('search').val();
+ 
+        if ( ( isNaN( min ) && isNaN( max ) ) ||
+             ( isNaN( min ) && num <= max ) ||
+             ( min <= num   && isNaN( max ) ) ||
+             ( min <= num   && num <= max ) )
+        {
+            return true;
+        }
+        return false;
+    }
+);
+
+//Converting into data table
+$(document).ready(function() {
+  mytable = $('.dataframe').DataTable({
+  
+  responsive: {
+            details: {
+                type: 'column',
+                target: 'tr'
+            }
+        },
+        columnDefs: [ {
+            className: 'control',
+            orderable: false,
+            targets:   0
+        } ],
+        order: [ 1, 'asc' ],  
+  
+    initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value="">All</option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+ 
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+ 
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        },
+    colReorder: true,
+    select: true,
+    fixedHeader: true,
+    searchHighlight: true,
+
+  });
+  $('#min, #max').keyup( function() {
+        mytable.draw();
+  });
+
+  $("table").addClass("table table-striped table-bordered nowrap");
+  $("thead").addClass("table-dark");
+});
+
+//Clicking searching button
+function find_data() {
+  //console.log('Ji');
+  var sel = document.getElementById("box");
+  var text= sel.options[sel.selectedIndex].text;
+  mytable.search(text).draw();
+}
+
+//Clicking Reset button
+function all_clear() {
+  document.getElementById('search').value = ''; 
+  document.getElementById('dynamicInput').innerHTML = '';
+  document.getElementById("select").innerHTML = "";
+  mytable.search("").draw();
+}
+
+
+</script>
+{% endblock js %}

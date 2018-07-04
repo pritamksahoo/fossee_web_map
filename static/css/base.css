@@ -1,0 +1,65 @@
+#cover {
+    padding-top:19em;
+    width: 100%;
+    vertical-align: middle;
+    text-align: center;
+    height: 100vh;
+    z-index: 9999;
+    position: fixed;
+    background-color: #111;
+  }
+
+  #s1,#s2,#s3,#s4,#s5,#s6,#s7,#s8,#s9,#s10, #ult {
+    letter-spacing: 3px;
+    font-family: Courier;
+    font-size: 30px;
+    color: #ccc;
+  }
+  #s1 {
+    -webkit-animation: fade 1s linear infinite;
+    animation: fade 1s linear infinite;
+  }
+  #s2 {
+    -webkit-animation: fade 2s linear infinite;
+    animation: fade 2s linear infinite;
+  }
+  #s3 {
+    -webkit-animation: fade 3s linear infinite;
+    animation: fade 3s linear infinite;
+  }
+  #s4 {
+    -webkit-animation: fade 4s linear infinite;
+    animation: fade 4s linear infinite;
+  }
+  #s5 {
+    -webkit-animation: fade 1s linear infinite;
+    animation: fade 1s linear infinite;
+  }
+  #s6 {
+    -webkit-animation: fade 2s linear infinite;
+    animation: fade 2s linear infinite;
+  }
+  #s7 {
+    -webkit-animation: fade 3s linear infinite;
+    animation: fade 3s linear infinite;
+  }
+  #s8 {
+    -webkit-animation: fade 1s linear infinite;
+    animation: fade 1s linear infinite;
+  }
+  #s9 {
+    -webkit-animation: fade 2s linear infinite;
+    animation: fade 2s linear infinite;
+  }
+  #s10 {
+    -webkit-animation: fade 3s linear infinite;
+    animation: fade 3s linear infinite;
+  }
+  @-webkit-keyframes fade {
+    50%{opacity:0.2}
+    100%{opacity:1}
+    ;}
+  @-moz-keyframes fade {
+   50%{opacity:0.2}
+    100%{opacity:1}
+  }

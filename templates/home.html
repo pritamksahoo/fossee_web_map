@@ -1,0 +1,60 @@
+{% load static %}<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <script type="text/javascript" src="{% static 'js/home.js' %}"></script>
+</head>
+<!--  body  -->
+<body onload="myFunction()">
+  <!-- nav bar -->
+  <nav class="navbar navbar-expand-md bg-dark">
+    <a class="navbar-brand" href="#">Home</a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+
+<!-- main body -->
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-4"></div>
+
+    <!-- upload form begins -->
+    <div class="col-sm-4">
+      <form action="/upload_file/" method="post" name="form" class="myform" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h5>Upload your .csv file here</h5><hr>
+        <input id="uploadFile" name="filename" value="Choose your .csv file" disabled="disabled" />
+        <div class="fileUpload btn btn-primary" onmouseover="this.style.backgroundColor='#201B1B'" onmouseout="this.style.backgroundColor='#302E2E'">
+            <span style="font-size: 12.5px; font-family: Courier"><b>Browse</b>
+            <input id="uploadBtn" name="myfile" type="file" class="upload" accept=".csv" required />
+        </div></span><hr>
+        <span id="see">
+
+          <input type="submit" value="Upload" class="btn" onMouseOver="this.style.backgroundColor='#152315'" onmouseout="this.style.backgroundColor='#2D3A2D'" />
+          &nbsp;
+          <input type="reset" value="Cancel" onclick="goback()" class="btn" onMouseOver="this.style.backgroundColor='#1F0706'" onmouseout="this.style.backgroundColor='#56190a'" />
+
+        </span>
+      </form>
+    </div>
+    <!-- form ends -->
+    
+    <div class="col-sm-4"></div>
+  </div>
+</div>
+
+<!-- javascript -->
+
+<script type="text/javascript">
+    document.getElementById("uploadBtn").onchange = function () {
+      document.getElementById("uploadFile").value = this.value;
+      if(form.filename.value != "Choose your .csv file") {
+        document.getElementById("see").style.visibility = "visible";
+      }
+    };
+</script>
+
+</body>

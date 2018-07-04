@@ -1,0 +1,42 @@
+{% load static %}<!DOCTYPE html>
+<html>
+<head>
+  
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+</head>
+<body style="background-color: black;">
+  <div id="modal4" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="padding-bottom: 1em; background-color: darkgreen; padding: 5px; margin: 4px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 16px; margin-left: 1em; padding-bottom: 5px;"><b>INFO ! </b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" style="margin: 1px; margin-top: 1px; margin-left: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            Cleaning has been done.<hr><b style="font-family: verdana">Redirecting to 'Original data' page in 5 seconds.</b>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    <meta http-equiv="refresh" content="5;url={% url 'analyze' fileid %}" />
+
+    <script type="text/javascript">
+
+      $(window).on('load',function(){
+        $('#modal4').modal('show');
+      });
+
+    </script>
+
+</body>
+
+
+

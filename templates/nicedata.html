@@ -1,0 +1,125 @@
+{% extends 'base.html' %}{% load static %}{% load util %}
+  {% block title %}Your file [STAT]{% endblock %}
+  {% block stylesheet %}
+  <link rel="stylesheet" href="{% static 'css/yourdata.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/responsive.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <link rel="stylesheet" href="{% static 'css/select.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/colReorder.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dataTables.searchHighlight.css' %}">
+  {% endblock %}
+  {% block script %}
+  <script src="{% static 'js/w3data.js' %}"></script>
+  <script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+  <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'js/responsive.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.colReorder.min.js' %}"></script>
+  <script src="{% static 'js/dataTables.select.min.js' %}"></script>
+  <script src="{% static 'js/nicedata.js' %}"></script>
+  <script src="{% static 'js/jquery.highlight.js' %}"></script>
+  <script src="{% static 'js/dataTables.searchHighlight.min.js' %}"></script>
+  {% endblock %}
+
+  {% block stat %}
+  <div class="btn-group" style="float: right; margin-top: 1em; margin-right: 3em;">
+    <a href="{% url 'groupby_district' fileid %}" class="btn btn-success" style=" padding: 5px; padding-right: 6px; padding-left: 6px; font-size: 10px;">   Indiv. District
+    </a>
+    <a href="{% url 'groupby_state' fileid %}" class="btn btn-warning" style=" padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;">Indiv. State
+    </a>
+    <a href="{% url 'groupby_college' fileid %}" class="btn btn-danger" style=" padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px;">
+    Indiv. College
+    </a>
+  </div>
+  {% endblock %}
+
+  <!-- Main body -->
+  {% block container %}
+  
+    <table border="0" cellspacing="5" cellpadding="5">
+      <tbody>
+        <tr>
+          <td>Minimum no. :</td>
+          <td><input type="text" id="min" name="min"></td>
+        </tr>
+        <tr>
+          <td>Maximum no. :</td>
+          <td><input type="text" id="max" name="max"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button type="button" id="mybtn1" class="btn btn-primary" data-toggle="modal" data-target="#modal5" hidden>
+    button
+    </button>
+
+
+    <div id="modal5" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-body" style="margin: 1em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+            <button type="button" class="close" data-dismiss="modal" style="color: #444444;">&times;</button>
+            <p style="font-family: verdana">A small stat about your data has been shown here.</p><p style="font-size: 12px;">You can see it's original view on <b>'Full data'</b> page, which may take a long time to load <i>(If your file contains huge number of records).</i></p>
+            <button onclick="set_cookie()" data-dismiss="modal" class="btn btn-secondary" style="font-size: 10px; padding: 4px; float: right;">Do not show this again</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div id='display' style="min-width: 100%"></div>
+
+  {% endblock container %}
+  <!-- End of body -->
+
+{% block js %}
+<script type="text/javascript">
+
+document.getElementById('display').innerHTML = {{ orgdata|js }};
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+jQuery(function(){
+  console.log(getCookie('no_thanks'));
+  if (getCookie('no_thanks') != 'active') {
+    jQuery('#mybtn1').click();
+  }
+});
+
+function set_cookie() {
+  document.cookie = "no_thanks=active";
+}
+
+// Adding footer to the table
+$(".dataframe").append(
+    $('<tfoot style="font-size: 12px;" />').append($("table thead tr").clone())
+);
+$("table tfoot tr th").css({
+  'font-family':'arial'
+});
+$("table thead tr th").css({
+  'text-align':'center'
+});
+
+</script>
+{% endblock js %}
