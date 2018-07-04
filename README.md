@@ -1,2 +1,2 @@
-# fossee_plotmap
+# fossee_web_map
 # fossee
