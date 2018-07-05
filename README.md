@@ -35,3 +35,7 @@ Two types of process is going on here -
 * But, in case of **college names**; we will give user a list of suggestions, if the data is found to be erroneous.
 > For **Approximate string searching** we are using [fuzzy string matching technique](https://github.com/seatgeek/fuzzywuzzy). It takes two strings and evaluates the percentage match between them. 
 * We are using python's **fuzzywuzzy** library to accomplish this.
+# Plotting 
+We are providing two types of plots here - 
+* **INDIA MAP (STATE-WISE)**
+hjk
