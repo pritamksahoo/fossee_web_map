@@ -2,7 +2,8 @@
 
 # Mapper
 [Python](https://python.fossee.in/fellowship2018/) | [Summer Fellowship 2018](https://fossee.in/fellowship) | [Fossee](https://fossee.in/) | [IIT Bombay](http://www.iitb.ac.in/en)
-> An web app for letting user upload their data (.csv format) and get a better visualization.
+> An web app for letting user upload their **data (.csv format)** and get a better visualization.
+> If you already know about this project, you can directly go to the [next part](#next-step)
 ### What 'data' will contain :
 * College/School Name (Only in INDIA)
 * District Name
@@ -48,3 +49,7 @@ domain : 'IN',
 ```
 ### 3-D Pie Chart :
 We are again taking help of [Google Pie-chart](https://developers.google.com/chart/interactive/docs/gallery/piechart) for drawing pie-chart, which nicely shows the percentage statistics for each state in a 3D fashion. 
+<br>
+# Next step
+So, that was all about this project.
+<br>Now, if you want to run this in your local machine, follow the following instructions.
