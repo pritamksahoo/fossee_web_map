@@ -34,3 +34,4 @@ Two types of process is going on here -
 * If any kind of error is there in **State** or **District** data; we will auto currect it for user, as it's too obvious.
 * But, in case of **college names**; we will give user a list of suggestions, if the data is found to be erroneous.
 > For **Approximate string searching** we are using [fuzzy string matching technique](https://github.com/seatgeek/fuzzywuzzy). It takes two strings and evaluates the percentage match between them. 
+* We are using python's **fuzzywuzzy** library to accomplish this.
