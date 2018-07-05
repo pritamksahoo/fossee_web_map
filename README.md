@@ -30,3 +30,7 @@ We are considering the following two factors -
 * If there are duplicate rows, one will be kept, others will be removed.
 > We are using **Pandas** library for [data processing](https://www.dataquest.io/blog/pandas-python-tutorial/). It is an open-source, BSD-licensed Python library providing high-performance, easy-to-use data structures and data analysis tools for Python programming language.<br><br>In our case, we are mainly focussing on pandas' **DataFrame** object to handle users' data.
 # Error Handling
+Two types of process is going on here - 
+* If any kind of error is there in **State** or **District** data; we will auto currect it for user, as it's too obvious.
+* But, in case of **college names**; we will give user a list of suggestions, if the data is found to be erroneous.
+> For **Approximate string searching** we are using [fuzzy string matching technique](https://github.com/seatgeek/fuzzywuzzy). It takes two strings and evaluates the percentage match between them. 
