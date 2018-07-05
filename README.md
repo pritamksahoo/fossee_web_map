@@ -12,6 +12,7 @@
 * International Dial Code 
 * etc.
 ### Requirements :
+```
 * Django
 * Python
 * virtualenv
@@ -19,6 +20,7 @@
 * pandas 
 * numpy
 * fuzzywuzzy
+```
 ## About this project in a nutshell :
 **Mapper** is all about plotting user's *data statistics*. It will fetch the data user uploads, **process** it, and finally, plot it on **INDIA MAP** and **PIE CHART**. 
 > *Data processing* will be done by [cleaning the data](#data-cleaning) and [error handling](#error-handling).
