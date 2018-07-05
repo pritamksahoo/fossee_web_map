@@ -46,3 +46,5 @@ domain : 'IN',
 .
 .
 ```
+### 3-D Pie Chart :
+We are again taking help of [Google Pie-chart](https://developers.google.com/chart/interactive/docs/gallery/piechart) for drawing pie-chart, which nicely shows the percentage statistics for each state in a 3D fashion. 
