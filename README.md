@@ -36,7 +36,7 @@ Two types of process are going on here -
 > For **Approximate string searching** we are using [fuzzy string matching technique](https://github.com/seatgeek/fuzzywuzzy). It takes two strings and evaluates the percentage match between them. 
 * We are using python's **fuzzywuzzy** library to accomplish this.
 # Plotting 
-We are providing two types of plots here - 
+We are providing two types of plots here - <br>
 **INDIA MAP (STATE-WISE) :**
 <br><br>We are using [Google Geochart](https://developers.google.com/chart/interactive/docs/gallery/geochart) for drawing India State-wise map by providing some characteristics variables to extract it - 
 ```
