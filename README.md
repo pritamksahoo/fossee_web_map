@@ -37,7 +37,7 @@ Two types of process are going on here -
 * We are using python's **fuzzywuzzy** library to accomplish this.
 # Plotting 
 We are providing two types of plots here - 
-* **INDIA MAP (STATE-WISE) :**
+**INDIA MAP (STATE-WISE) :**
 <br><br>We are using [Google Geochart](https://developers.google.com/chart/interactive/docs/gallery/geochart) for drawing India State-wise map by providing some characteristics variables to extract it - 
 ```
 region : 'IN',
