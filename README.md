@@ -11,3 +11,12 @@
 * Email
 * International Dial Code 
 * etc.
+### Requirements :
+* Django
+* Python
+* virtualenv
+* pip
+* pandas 
+* numpy
+* fuzzywuzzy
+### 
