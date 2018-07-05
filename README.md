@@ -2,7 +2,7 @@
 
 # Mapper
 [Python](https://python.fossee.in/fellowship2018/) | [Summer Fellowship 2018](https://fossee.in/fellowship) | [Fossee](https://fossee.in/) | [IIT Bombay](http://www.iitb.ac.in/en)
-> An web app for letting user upload their **data (.csv format)** and get a better visualization.
+> An web app for letting user upload their **data (.csv format)** and get a better visualization.<br>
 > If you already know about this project, you can directly go to the [next part](#next-step)
 ### What 'data' will contain :
 * College/School Name (Only in INDIA)
