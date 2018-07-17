@@ -53,38 +53,46 @@
 
           {% if 'yes' in row %}   <!-- if there is error -->
             <tr data-user="5">
-              <th style="padding-right: 0px;"><button 
-                onclick="
-                  var s = $(this).parent();
-                  var sel = s.parent().children('#change');
-                  var seldom = sel[0];
-                  var e = sel.children('select'); 
-                  var text = $('option:selected', e).text();
-                  seldom.innerHTML = text;
-                  s[0].innerHTML = '<i>Handeled</i>';
-                  s.queue(function() {
-                    s.css('background-color', 'green');
-                    s.css('color', 'white');
-                  });
-                  var index = sel.parent().children('#LastTD')[0].innerHTML;
-                  //Commit changes
-                  save(text, index);"
+              <th style="padding-right: 0px;">
+                <button 
+                  onclick="
 
-                class="btn btn-success" style="margin: 0px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px; color: white;"><b>Save</b> 
-              </button></th>
+                    //Catching changes and saving those
+                    var s = $(this).parent();
+                    var sel = s.parent().children('#change');
+                    var select = sel[0];
+                    var e = sel.children('select'); 
+                    var text = $('option:selected', e).text();
+                    select.innerHTML = text;
+                    s[0].innerHTML = '<i>Handeled</i>';
+                    s.queue(function() {
+                      s.css('background-color', 'green');
+                      s.css('color', 'white');
+                    });
+                    var index = sel.parent().children('#LastTD')[0].innerHTML;
+                    //Commit changes
+                    save(text, index);"
+
+                  class="btn btn-success" style="margin: 0px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px; color: white;">
+                  <b>Save</b> 
+                </button>
+              </th>
 
               {% for item in row %}
+
                 {% if item|get_type == 'list' %}
                   <td id='change'><select style="margin: 0px;" autofocus>
                       {% for sel in item %}
                         <option value=>{{ sel }}</option>
                       {% endfor %}
                   </select></td>
+
                 {% else %}
                   <td>{{ item }}</td>
                 {% endif %}
 
               {% endfor %}
+              
             </tr>
           {% else %}
             <tr data-user="1">    <!-- If there is no error -->

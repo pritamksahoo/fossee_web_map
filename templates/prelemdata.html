@@ -23,8 +23,12 @@
   <script src="{% static 'js/dataTables.select.min.js' %}"></script>
   <script src="{% static 'js/yourdata.js' %}"></script>
   <script src="{% static 'js/jquery.highlight.js' %}"></script>
-  <script src="{% static 'js/dataTables.searchHighlight.min.js' %}"></script> 
+  <script src="{% static 'js/dataTables.searchHighlight.min.js' %}"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+  {% endblock %}
+
+  {% block stat %}
+    <a href="{% url 'download' fileid %}" class="btn btn-success" style="float: right; margin-top: 1em; margin-right: 3em; padding: 5px; padding-right: 6px; padding-left: 6px; font-size: 10px;" onclick="download();"><b>Download current version</b></a>
   {% endblock %}
 
   <!-- Main body -->
@@ -52,6 +56,37 @@
       </tbody>
     </table>
 
+
+    <!--Displaying data -->
+    <table border="1" id="mytable" class="dataframe">
+      <thead>
+        <tr style="text-align: right">
+          <th style="padding-right: 0px;"></th>
+          {% for index in orgdata.columns %}
+            <th>{{ index }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        
+        {% for row in orgdata.values %}
+
+            <tr data-user="1"> 
+              <th class="btn btn-secondary" style="margin: 7px; padding: 4px; font-size: 11px; color: white;">
+                  <b>Edit</b> 
+              </th>
+              {% for item in row %}
+                <td>{{ item }}</td>
+              {% endfor %}
+            </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+
+    <!-- By clicking #modla6 opens (by jquery) -->
     <button type="button" id="mybtn2" class="btn btn-primary" data-toggle="modal" data-target="#modal6" hidden>
     button
     </button>
@@ -71,7 +106,35 @@
       </div>
     </div>
 
+    <!-- Displaying actual data 
     <div id='display' style="max-width: 100%; padding-left: 0px; margin-left: 0px;"></div>
+    -->
+
+    <button id="edit" type="button" data-toggle="modal" data-target="#modal9" hidden>button</button>
+
+    <!--For editing row -->
+    <div id="modal9" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="background-color: darkgray; margin: 4px; padding: 0px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 13px; margin-left: 1em; padding-bottom: 5px"><b>Edit</b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" id="edit_form" style="margin: 1.5em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+          </div>
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" style="padding:4px; font-size: 11px">Cancel</button>
+            <a class="btn btn-success" onclick="grab_update();" data-dismiss="modal" style="padding:4px; font-size: 11px; color: white;">Update</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
 
   {% endblock container %}
   <!-- End of body -->
@@ -79,9 +142,7 @@
 {% block js %}
 <script type="text/javascript">
 
-var someVar = {{ orgdata|js }};
-document.getElementById('display').innerHTML = someVar;
-
+//function for fetching cookies by name
 function getCookie(cname) {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
@@ -98,13 +159,15 @@ function getCookie(cname) {
     return "";
 }
 
+//Displaying modal if cookie is not active
 jQuery(function(){
-  console.log(getCookie('no_thank'));
+  //console.log(getCookie('no_thank'));
   if (getCookie('no_thank') != 'active') {
     jQuery('#mybtn2').click();
   }
 });
 
+//Setting cookie value
 function set_cookie() {
   document.cookie = "no_thank=active";
 }
@@ -140,10 +203,13 @@ $('#search').keyup(function () {
         mydata = data['search_result'];
         //console.log(mydata);   
         var res="<select id='box' autofocus>";
+
         for (elem in mydata) {
           res += '<option value="' + mydata[elem] + '">' + mydata[elem] + '</option>';
         }
+
         res += '</select> &nbsp;<button class="btn" style="background-color: green; padding: 1.5px; padding-right: 6px; padding-left: 6px; margin-left: 3em; font-size: 10px; color: white;" onclick="find_data()">Search</button>';
+
         document.getElementById("dynamicInput").innerHTML = res;
         document.getElementById("select").innerHTML = "Select college :";
         //console.log(document.getElementById("dynamicInput"));
@@ -179,23 +245,88 @@ $.fn.dataTable.ext.search.push(
     }
 );
 
+var tableRow;
+//Storing all the columns of the datatable/dataframe
+var columns = {{ cols|js }};
+//Row editing options
+$('.dataframe tbody').on( 'click', 'tr th', function () {
+
+  //Row element of the selected row
+  tableRow = mytable.row($(this).parents('tr'));
+  //Data of the selected row
+  var data_to_edit = mytable.row( this ).data(); 
+  //Form to edit
+  var form_elem = "<form id='to_edit' class='form-horizontal'><div class='form-group'>";
+  var len = data_to_edit.length;
+  var i;
+
+  for(i=1; i<len-1; i++){
+    form_elem += "<label style='font-size: 12px'><b>" + columns[i-1] + 
+    " : </b></label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' name='f" + i + "' value='" + data_to_edit[i] + "' /><br>";
+  }
+
+  form_elem += "<label style='font-size: 12px'><b>Pos(Ignore) : </b>" + 
+    "</label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' id='pos' name='pos' value='" + data_to_edit[i] + "' disabled />";
+  form_elem += "</div></form>";
+
+  document.getElementById('edit_form').innerHTML = form_elem;
+  jQuery('#edit').click();
+
+} );
+
+//Reflect the changes in front of user
+function grab_update() {
+  document.getElementById('pos').disabled = false;
+  var datastring = $("#to_edit").serialize();
+  //console.log(datastring);
+  $.ajax({
+    url: '{% url "save_edits" fileid %}',
+    data: datastring,
+    dataType: 'json',
+    async: true,
+    success: function(data){
+      //Modifications have been updated  
+      var rData = ['<th class="btn btn-secondary" style="margin: 7px; padding: 4px; font-size: 11px; color: white;"><b>Edit</b></th>'];
+
+      //Grabing the form elements
+      $('form input').each(
+        function(index){  
+            var input = $(this);
+            rData.push(input.val());
+            //alert('Type: ' + input.attr('type') + 'Name: ' + input.attr('name') + 'Value: ' + input.val());
+        }
+      );
+      //Redrawing the data table
+      mytable
+              .row( tableRow )
+              .data(rData)
+              .draw();
+
+    }
+  });
+}
+
 //Converting into data table
 $(document).ready(function() {
   mytable = $('.dataframe').DataTable({
-  
+
+  /*If responsive data table is required , otherwise hide the responsive, columnDefs, and order...then it will show the full data
   responsive: {
-            details: {
-                type: 'column',
-                target: 'tr'
-            }
-        },
-        columnDefs: [ {
-            className: 'control',
-            orderable: false,
-            targets:   0
-        } ],
-        order: [ 1, 'asc' ],  
-  
+      details: {
+          type: 'column',
+          target: 'tr'
+      }
+  },
+  columnDefs: [ {
+      className: 'control',
+      orderable: false,
+      targets:   0
+  } ],
+  order: [ 1, 'asc' ], */ 
+
+  // adding options with all the names in the current column in the footer
     initComplete: function () {
             this.api().columns().every( function () {
                 var column = this;
@@ -245,7 +376,6 @@ function all_clear() {
   document.getElementById("select").innerHTML = "";
   mytable.search("").draw();
 }
-
 
 </script>
 {% endblock js %}

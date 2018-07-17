@@ -33,7 +33,7 @@ def analyze(request, pk):
     try:
         file = csvfile.objects.get(id=pk)
     except csvfile.DoesNotExist:
-        raise Http404
+        raise Http404("File not found")
     data = pd.read_csv(str(file))
     cols = data.columns.tolist()
     col1 = process.extractOne('STATE', cols, scorer=fuzz.WRatio)[0]
@@ -68,8 +68,10 @@ def showdata(request, pk):
     except csvfile.DoesNotExist:
         raise Http404
     data = pd.read_csv(str(file))
-    data = data[data.columns.tolist()[1:]]
-    return render(request, 'prelemdata.html', {'fileid': pk, 'orgdata': data.to_html(), 'map': 'no'})
+    cols = data.columns.tolist()[1:]
+    data = data[cols]
+    data['pos'] = data.index
+    return render(request, 'prelemdata.html', {'fileid': pk, 'cols': cols, 'orgdata': data, 'map': 'no'})
 
 
 def groupby_district(request, pk):
@@ -214,8 +216,9 @@ def modify_data(request, pk):
             match = process.extractOne(data.loc[i][0], list_of_state, scorer=fuzz.WRatio)
             if int(match[1]) > 80:
                 data.loc[i][0] = str(match[0])
-            else:
+            else:                                       # If no such state exists
                 data.loc[i][0] = np.nan
+
         '''If state is null still, fill that w.r.t. corresponding college'''
         if data.loc[i].isnull()['STATE'] == True:
             if str(data.loc[i][2]) in list_of_college:
@@ -236,7 +239,7 @@ def modify_data(request, pk):
                 if(match):
                     if int(match[1]) > 80:
                         data.loc[i][1] = str(match[0])
-                    else:
+                    else:                                   #If no such district exists
                         data.loc[i][1] = np.nan
             else:
                 list_ref_district = list(map(lambda x:x.upper(), list(ref_data['DISTRICT'])))
@@ -248,22 +251,24 @@ def modify_data(request, pk):
 
         '''Checking College data'''
         if str(data.loc[i][2]) not in list_of_college:
+            '''If error is there changing the 'error' column for that entry to 'yes' '''
             data.loc[i]['error'] = 'yes'
-            if data.loc[i].isnull()['STATE'] == False:
+
+            if data.loc[i].isnull()['STATE'] == False:                      #If state is not null
                 list_ref_college = list(map(lambda x:x.upper(), list(ref_data['COLLEGE NAME'][ref_data['STATE'].str.upper() == str(data.loc[i][0]).upper()])))
             else:
                 list_ref_college = list_of_college
             
-            #print(list_ref_college)
+            '''First step : full string comparison '''
             match = process.extract(str(data.loc[i][2]), list_ref_college, scorer=fuzz.WRatio)
             first = int(match[0][1])
             for j in range(len(match)):
                 if first-int(match[j][1]) > 5:
                     break
-            match = match[:j+1]
+            match = match[:j+1]                 # Deleting out entries with less percentage of match
             match1 = []
-            #print(match)
-            '''abbreviation matching'''
+            
+            '''Second step : abbreviation matching'''
             if len(str(data.loc[i][2])) <= 10 and len(str(data.loc[i][2]).split()) <= 2:
                 for j in range(len(list_ref_college)):
                     temp = ''.join(w[0].upper() for w in list_ref_college[j].split())
@@ -389,6 +394,42 @@ def save_changes(request, pk):
         data = {
             'text': text
         }
+        return JsonResponse(data)
+
+
+def download(request, pk):
+    '''To download the modified version of user's file '''
+    try:
+        file = csvfile.objects.get(id=pk)
+    except csvfile.DoesNotExist:
+        raise Http404
+    with open(str(file), 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=' + str(file)
+        response['Content_Type'] = 'application/vnd.ms-excel; charset=utf-8'
+        return response
+
+
+def save_edits(request, pk):
+    '''To update the editing of user'''
+    if request.is_ajax():
+        try:
+            file = csvfile.objects.get(id=pk)
+        except csvfile.DoesNotExist:
+            raise Http404
+
+        index = int(request.GET.get('pos', None))
+
+        data = pd.read_csv(str(file))
+        cols = data.columns.tolist()
+        data['temp'] = data.index
+        del cols[0]
+        for i in range(len(cols)):
+            data.loc[data['temp'] == index, cols[i]] = request.GET.get('f'+str(i+1), None)
+        del data['temp']
+        data = data[cols]
+        data.to_csv(str(file))
+        data = {}
         return JsonResponse(data)
 
 

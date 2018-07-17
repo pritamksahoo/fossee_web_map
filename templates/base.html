@@ -3,21 +3,35 @@
   <title>{% block title %}Your file{% endblock %}</title>
   <style type="text/css">
     #visualization path {
-        stroke-width:1; /* control the countries borders width */
-        stroke:white; /* choose a color for the border */
-        }
+      stroke-width:1; /* control the countries borders width */
+      stroke:white; /* choose a color for the border */
+    }
+
+    #disabled-button-wrapper {
+      display: inline-block;
+    }
+
+    #disabled-button-wrapper .btn[disabled] {
+      pointer-events: none;
+    }
+
+    #disabled-button-wrapper {
+      cursor: not-allowed;
+    }
   </style>
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <!-- For Google GeoChart India Map -->
   <script type='text/javascript' src='https://www.google.com/jsapi'></script>
   <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
+
   {% block stylesheet %}{% endblock %}
   {% block script %}{% endblock %}
 
@@ -72,9 +86,11 @@
   <a class="btn btn-danger" title="Click here when you are finished with your job" href="" data-toggle="modal" data-target="#modal7" style="padding: 4px; padding-right: 6px; padding-left: 6px; margin-bottom: 10px; margin-top: 1.5em; margin-left: 3em; font-size: 10px;">Close when done</a>&nbsp;
   
   <!-- For plotting -->
-  <button type="button" title="Go to '/Your data/Individual State' page to see" id="mybtn" class="btn btn-primary" data-toggle="modal" data-target="#modal2" style="padding: 4px; padding-right: 6px; padding-left: 6px;  margin-bottom: 10px; margin-top: 1.5em; font-size: 10px;" disabled>
-    Plot on India Map and Charts
-  </button>
+  <div id="disabled-button-wrapper" style="display: inline">
+    <button id="mybtn" class="btn btn-primary" data-toggle="modal" data-target="#modal2" style="padding: 4px; padding-right: 6px; padding-left: 6px;  margin-bottom: 10px; margin-top: 1.5em; font-size: 10px;" disabled>
+      Plot on India Map and Charts
+    </button>
+  </div>
 
   {% block stat %}{% endblock %}
 
@@ -124,7 +140,7 @@
             
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-            <a href="{% url 'clean_data' fileid %}" type="button" class="btn btn-primary">OK</a>
+            <a href="{% url 'clean_data' fileid %}" class="btn btn-primary">OK</a>
           </div>
 
         </div>
@@ -148,7 +164,7 @@
             
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-            <a href="{% url 'modify_data' fileid %}" type="button" class="btn btn-primary">OK</a>
+            <a href="{% url 'modify_data' fileid %}" class="btn btn-primary" onclick="$('#cover').show();" >OK</a>
           </div>
 
         </div>
@@ -173,7 +189,7 @@
             
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-            <a href="{% url 'close' fileid %}" type="button" class="btn btn-primary">OK</a>
+            <a href="{% url 'close' fileid %}" class="btn btn-primary">OK</a>
           </div>
 
         </div>
@@ -195,21 +211,14 @@
 
 <script>
 
-  function bealert() {
-    var ans = confirm("All entries containg atleast one 'Null' (NaN) value will be removed ! Please be sure before doing this.\n Press 'OK' to clean your data! ");
-    if(ans == true) {
-      
-    }
-  }
+$(document).ready(function() {
+ $("#cover").hide();
+});
 
-  $(document).ready(function() {
-   $("#cover").hide();
-  });
+//Start plotting
 
-  //Start plotting
-
-  google.load('visualization', '1', {'packages': ['geochart', 'corechart']});
-  google.setOnLoadCallback(drawVisualization);
+google.load('visualization', '1', {'packages': ['geochart', 'corechart']});
+google.setOnLoadCallback(drawVisualization);
 
 function drawVisualization() {
   var data = google.visualization.arrayToDataTable(
@@ -281,6 +290,12 @@ function drawVisualization() {
     document.getElementById("mybtn").title = "Click here to see State-wise India Map plot";
   </script>
 
+{% else %}
+  <script type="text/javascript">
+    $("#disabled-button-wrapper").click(function() {
+      alert("Go to 'Your Data/Indiv. State' page to see the plot");
+    });
+  </script>
 {% endif %}
 
 {% block js %}{% endblock %}
