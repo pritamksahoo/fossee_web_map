@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^ajax/search/(?P<pk>\d+)/$', views.search, name='search'),
     url(r'^ajax/save_changes/(?P<pk>\d+)/$', views.save_changes, name='save_changes'),
     url(r'^ajax/save_edits/(?P<pk>\d+)/$', views.save_edits, name='save_edits'),
+    url(r'^ajax/save_edits_at_modify/(?P<pk>\d+)/$', views.save_edits_at_modify, name='save_edits_at_modify'),
     url(r'^your_file/download/(?P<pk>\d+)/$', views.download, name='download'),
     url(r'^favicon\.ico$',RedirectView.as_view(url='/static/images/favicon.ico')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -53,7 +53,8 @@
 
           {% if 'yes' in row %}   <!-- if there is error -->
             <tr data-user="5">
-              <th style="padding-right: 0px;">
+
+              <td style="padding-right: 0px;">
                 <button 
                   onclick="
 
@@ -62,21 +63,16 @@
                     var sel = s.parent().children('#change');
                     var select = sel[0];
                     var e = sel.children('select'); 
+                    //Catching the selected options
                     var text = $('option:selected', e).text();
-                    select.innerHTML = text;
-                    s[0].innerHTML = '<i>Handeled</i>';
-                    s.queue(function() {
-                      s.css('background-color', 'green');
-                      s.css('color', 'white');
-                    });
                     var index = sel.parent().children('#LastTD')[0].innerHTML;
                     //Commit changes
-                    save(text, index);"
+                    save(text, index, s, s.parent());"
 
-                  class="btn btn-success" style="margin: 0px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px; color: white;">
+                  class="btn btn-primary" style="margin: 0px; padding: 4px; padding-right: 6px; padding-left: 6px; font-size: 10px; color: white;">
                   <b>Save</b> 
                 </button>
-              </th>
+              </td>
 
               {% for item in row %}
 
@@ -96,7 +92,9 @@
             </tr>
           {% else %}
             <tr data-user="1">    <!-- If there is no error -->
-              <th style="padding-right: 0px;">No error</th>
+              <th class="btn btn-secondary" style="margin: 7px; padding: 4px; font-size: 11px; color: white;">
+                  <b>Edit</b> 
+              </th>
               {% for item in row %}
                 <td>{{ item }}</td>
               {% endfor %}
@@ -106,6 +104,32 @@
         {% endfor %}
       </tbody>
     </table>
+
+
+    <button id="edit" type="button" data-toggle="modal" data-target="#modal10" hidden>button</button>
+
+    <!--For editing row -->
+    <div id="modal10" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header" style="background-color: darkgray; margin: 4px; padding: 0px;">
+            <h5 id="htitle" class="modal-title" style="font-family: Arial; color: white; font-size: 13px; margin-left: 1em; padding-bottom: 5px"><b>Edit</b></h5>
+            <button type="button" class="close" data-dismiss="modal" style="color: #dddddd;">&times;</button>
+          </div>
+
+          <div class="modal-body" id="edit_form" style="margin: 1.5em; padding: 0px; margin-bottom: 1px; padding-bottom: 1em;">
+          </div>
+            
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" style="padding:4px; font-size: 11px">Cancel</button>
+            <a class="btn btn-success" onclick="grab_update();" data-dismiss="modal" style="padding:4px; font-size: 11px; color: white;">Update</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
     
   {% endblock container %}
   <!-- End of body -->
@@ -130,6 +154,83 @@ $("table thead tr th").css({
 $('table:first tr').each(function(){
   $(this).find('td:last').attr('id', 'LastTD');
 });
+
+
+var tableRow;
+//Storing all the columns of the datatable/dataframe
+var columns = {{ cols|js }};
+//Row editing options
+$('.dataframe tbody').on( 'click', 'tr th', function () {
+  //Row element of the selected row
+  tableRow = mytable.row($(this).parents('tr'));
+  console.log(tableRow);
+  //Data of the selected row
+  var data_to_edit = mytable.row( $(this).parents('tr') ).data(); 
+  //Form to edit
+  var form_elem = "<form id='to_edit' class='form-horizontal'><div class='form-group'>";
+  var len = data_to_edit.length;
+  var i;
+
+  for(i=1; i<len-2; i++){
+    form_elem += "<label style='font-size: 12px'><b>" + columns[i-1] + 
+    " : </b></label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' name='f" + i + "' value='" + data_to_edit[i] + "' /><br>";
+  }
+
+  if(data_to_edit[i] == 'no'){
+    form_elem += "<label style='font-size: 12px'><b>Error(Ignore) : </b>" + 
+    "</label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' id='error' name='error' value='" + data_to_edit[i] + "' disabled /><br>";
+  }else{
+    form_elem += "<label style='font-size: 12px'><b>Error(Ignore) : </b>" + 
+    "</label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' id='error' name='error' value='" + "yes ( handeled )" + "' disabled /><br>";
+  }
+
+  i++;
+  form_elem += "<label style='font-size: 12px'><b>Pos(Ignore) : </b>" + 
+    "</label> <input style='font-size: 13px' class='form-control'" + 
+    "type='text' id='pos' name='pos' value='" + data_to_edit[i] + "' disabled />";
+  form_elem += "</div></form>";
+
+  document.getElementById('edit_form').innerHTML = form_elem;
+  jQuery('#edit').click();
+
+} );
+
+//Reflect the changes in front of user
+function grab_update() {
+  document.getElementById('pos').disabled = false;
+  document.getElementById('error').disabled = false;
+  var datastring = $("#to_edit").serialize();
+  //console.log(datastring);
+  $.ajax({
+    url: '{% url "save_edits_at_modify" fileid %}',
+    data: datastring,
+    dataType: 'json',
+    async: true,
+    success: function(data){
+      //Modifications have been updated  
+      var rData = ['<th class="btn btn-secondary" style="margin: 7px; padding: 4px; font-size: 11px; color: white;"><b>Edit</b></th>'];
+
+      //Grabing the form elements
+      $('form input').each(
+        function(index){  
+            var input = $(this);
+            rData.push(input.val());
+            //alert('Type: ' + input.attr('type') + 'Name: ' + input.attr('name') + 'Value: ' + input.val());
+        }
+      );
+      //Redrawing the data table
+      mytable
+              .row( tableRow )
+              .data(rData)
+              .draw();
+
+    }
+  });
+}
+
 
 //Converting into data table
 $(document).ready(function() {
@@ -214,7 +315,7 @@ $("#reset").click(function() {
 });
 
 // Make changes in actual records
-function save(texto, indexo) {
+function save(texto, indexo, tago, elemento) {
   $.ajax({
     url: '{% url "save_changes" fileid %}',
     data: {
@@ -224,8 +325,21 @@ function save(texto, indexo) {
     dataType: 'json',
     async: true,
     success: function(data){
-      //mydata = data['text'];
-      //console.log(mydata);   
+  
+      //Data of the row to be edited
+      var data_to_edit = mytable.row(indexo).data();
+      data_to_edit[3] = texto;
+      var tag = tago;
+      var elem = elemento;
+      tag.replaceWith($("<th class='btn btn-success' style='margin: 7px; padding: 4px; font-size: 11px; color: white;'>" +
+                  "<b>Edit</b></th>")); 
+      tableRow = mytable.row(elemento);
+      mytable
+            .row( tableRow )
+            .data(data_to_edit)
+            .draw();
+
+       
     }
   });
 }

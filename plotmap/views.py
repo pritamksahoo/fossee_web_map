@@ -204,7 +204,8 @@ def modify_data(request, pk):
 
     data = pd.read_csv(str(file))
     temp_data = pd.read_csv(str(file))
-    data = data[data.columns.tolist()[1:4]]
+    cols = data.columns.tolist()[1:4]
+    data = data[cols]
     data['error'] = 'no'
     ref_data = pd.read_csv("files/college.csv")
     list_of_state = list(set(ref_data['STATE'].str.upper()))
@@ -216,8 +217,10 @@ def modify_data(request, pk):
             match = process.extractOne(data.loc[i][0], list_of_state, scorer=fuzz.WRatio)
             if int(match[1]) > 80:
                 data.loc[i][0] = str(match[0])
+                temp_data.loc[i]['STATE'] = str(match[0])
             else:                                       # If no such state exists
-                data.loc[i][0] = np.nan
+                data.loc[i][0] = temp_data.loc[i]['STATE'] = np.nan
+            temp_data.to_csv(str(file))
 
         '''If state is null still, fill that w.r.t. corresponding college'''
         if data.loc[i].isnull()['STATE'] == True:
@@ -238,16 +241,17 @@ def modify_data(request, pk):
                 match = process.extractOne(data.loc[i]['DISTRICT'], list_ref_district, scorer=fuzz.WRatio)
                 if(match):
                     if int(match[1]) > 80:
-                        data.loc[i][1] = str(match[0])
+                        data.loc[i][1] = temp_data.loc[i]['DISTRICT'] = str(match[0])
                     else:                                   #If no such district exists
-                        data.loc[i][1] = np.nan
+                        data.loc[i][1] = temp_data.loc[i]['DISTRICT'] = np.nan
             else:
                 list_ref_district = list(map(lambda x:x.upper(), list(ref_data['DISTRICT'])))
                 match = process.extractOne(data.loc[i][1], list_ref_district, scorer=fuzz.WRatio)
                 if int(match[1]) > 80:
-                    data.loc[i][1] = str(match[0])
+                    data.loc[i][1] = temp_data.loc[i]['DISTRICT'] = str(match[0])
                 else:
-                    data.loc[i][1] = np.nan
+                    data.loc[i][1] = temp_data.loc[i]['DISTRICT'] = np.nan
+            temp_data.to_csv(str(file))
 
         '''Checking College data'''
         if str(data.loc[i][2]) not in list_of_college:
@@ -293,7 +297,7 @@ def modify_data(request, pk):
             #print(data.loc[i][2])
     data['pos'] = data.index
     #data.to_csv(str(file))
-    return render(request, 'moddata.html', {'fileid': pk, 'orgdata': data, 'map': 'no'})
+    return render(request, 'moddata.html', {'fileid': pk, 'cols': cols, 'orgdata': data, 'map': 'no'})
 
 
 def search(request, pk):
@@ -340,7 +344,7 @@ def search(request, pk):
             final_res1 = []
             first1 = res1[0][1]
             for i in range(len(res1)):
-                if (first1 - res1[i][1]) <= 10:
+                if (first1 - res1[i][1]) <= 20:
                     final_res1.append(res1[i])
                 else:
                     break
@@ -425,6 +429,29 @@ def save_edits(request, pk):
         data['temp'] = data.index
         del cols[0]
         for i in range(len(cols)):
+            data.loc[data['temp'] == index, cols[i]] = request.GET.get('f'+str(i+1), None)
+        del data['temp']
+        data = data[cols]
+        data.to_csv(str(file))
+        data = {}
+        return JsonResponse(data)
+
+
+def save_edits_at_modify(request, pk):
+    '''To update the editing of user'''
+    if request.is_ajax():
+        try:
+            file = csvfile.objects.get(id=pk)
+        except csvfile.DoesNotExist:
+            raise Http404
+
+        index = int(request.GET.get('pos', None))
+
+        data = pd.read_csv(str(file))
+        cols = data.columns.tolist()
+        data['temp'] = data.index
+        del cols[0]
+        for i in range(len(cols[1:4])):
             data.loc[data['temp'] == index, cols[i]] = request.GET.get('f'+str(i+1), None)
         del data['temp']
         data = data[cols]
